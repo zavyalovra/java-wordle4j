@@ -42,19 +42,49 @@ class WordleTest {
 
     @Test
     void shouldNotThrowExceptionForValidWord() {
+        String validWord = "абзац";
         try {
-            game.validateWord("абзац");
+            game.validateWord(validWord);
+            Logger.log(validWord + ": validateWord работает исправно");
         } catch (Exception e) {
+            Logger.log(e.getMessage());
             fail();
         }
     }
 
     @Test
     void shouldThrowExceptionForInvalidWord() {
+        String inValidWord = "дом";
         try {
-            game.validateWord("дом");
+            game.validateWord(inValidWord);
+            fail();
         } catch (Exception e) {
-            assertFalse(e.getMessage().isEmpty());
+            Logger.log(inValidWord + ": " + e.getMessage());
+            assertEquals("Слово должно состоять строго из пяти букв", e.getMessage());
+        }
+    }
+
+    @Test
+    void shouldThrowExceptionForNoCyrillicWord() {
+        String inValidWord = "жулиk";
+        try {
+            game.validateWord(inValidWord);
+            fail();
+        } catch (Exception e) {
+            Logger.log(inValidWord + ": " + e.getMessage());
+            assertEquals("Слово должно состоять только из символов кириллицы", e.getMessage());
+        }
+    }
+
+    @Test
+    void shouldThrowExceptionForNoCharWord() {
+        String inValidWord = "жу123";
+        try {
+            game.validateWord(inValidWord);
+            fail();
+        } catch (Exception e) {
+            Logger.log(inValidWord + ": " + e.getMessage());
+            assertEquals("Слово должно состоять только из символов кириллицы", e.getMessage());
         }
     }
 
@@ -76,30 +106,38 @@ class WordleTest {
         KnowledgeBase kb = new KnowledgeBase();
 
         List<String> words = Arrays.asList("автор", "рыбка", "грязь");
-        String suggestion = kb.suggest(words);
 
-        assertNotNull(suggestion);
-        assertTrue(words.contains(suggestion));
+        try {
+            String suggestion = kb.suggest(words);
+            assertNotNull(suggestion);
+            assertTrue(words.contains(suggestion));
+        } catch (NoHintException e) {
+            Logger.log(e.getMessage());
+            assertNotNull(e.getMessage());
+        }
     }
 
     @Test
     void shouldReturnAnswerGame() {
-        WordleDictionary testDictionary = new WordleDictionary(Arrays.asList("автор"));
+        WordleDictionary testDictionary = new WordleDictionary(List.of("автор"));
         try {
             String answer = testDictionary.getAnswer();
             assertEquals("автор", answer);
         } catch (DictionaryException e) {
+            Logger.log(e.getMessage());
             fail();
         }
     }
 
     @Test
     void shouldThrowExceptionForEmptyDictionary() {
-        WordleDictionary testDictionary = new WordleDictionary(Arrays.asList());
+        WordleDictionary testDictionary = new WordleDictionary(List.of());
         try {
             testDictionary.getAnswer();
+            fail();
         } catch (DictionaryException e) {
-            assertNotNull(e.getMessage());
+            Logger.log(e.getMessage());
+            assertEquals("Словарь пуст. Невозможно загадать слово", e.getMessage());
         }
     }
 
@@ -108,5 +146,20 @@ class WordleTest {
         WordleDictionary testDictionary = new WordleDictionary(Arrays.asList("кот", "слово", "первопутье"));
         WordleDictionary filtered = testDictionary.getDictionary();
         assertEquals(1, filtered.getWords().size());
+    }
+
+    @Test
+    void shouldThrowNoHintExceptionWhenNoHintPossible() {
+        // Создаём пустой словарь
+        WordleDictionary emptyDict = new WordleDictionary(List.of());
+        WordleGame gameWithEmptyDict = new WordleGame("фляга", 6, emptyDict);
+
+        try {
+            gameWithEmptyDict.getSuggestion();
+            fail();
+        } catch (NoHintException e) {
+            Logger.log(e.getMessage());
+            assertEquals("Нет подходящих слов", e.getMessage());
+        }
     }
 }

@@ -76,12 +76,12 @@ public class KnowledgeBase {
         return result;
     }
 
-    public String suggest(List<String> words) {
+    public String suggest(List<String> words) throws NoHintException {
         Random random = new Random();
         List<String> candidates = filter(words);
 
         if (candidates.isEmpty()) {
-            return "Нет подходящих слов";
+            throw new NoHintException("Нет подходящих слов");
         }
 
         return candidates.get(random.nextInt(candidates.size()));

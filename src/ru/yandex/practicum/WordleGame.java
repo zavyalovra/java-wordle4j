@@ -40,6 +40,12 @@ public class WordleGame {
             throw new UserInputException("Слово должно состоять строго из пяти букв");
         }
 
+        for (int i = 0; i < normalizedAnswer.length(); i++) {
+            char symbol = normalizedAnswer.charAt(i);
+            boolean isCyrillic = symbol >= 'а' && symbol <= 'я';
+            if (!isCyrillic) throw new UserInputException("Слово должно состоять только из символов кириллицы");
+        }
+
         boolean isExistWord = false;
         for (String word : dictionary.getWords()) {
             if (normalizedAnswer.equals(word)) {
@@ -89,7 +95,11 @@ public class WordleGame {
         return result;
     }
 
-    public String getSuggestion() {
+    public String getSuggestion() throws NoHintException {
         return knowledge.suggest(dictionary.getWords());
+    }
+
+    public String getAnswer() {
+        return answer;
     }
 }

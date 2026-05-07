@@ -1,5 +1,6 @@
 package ru.yandex.practicum;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 /*
@@ -30,8 +31,14 @@ public class Wordle {
 
                 try {
                     if (answer.isEmpty()) {
-                        answer = game.getSuggestion();
-                        System.out.println(answer);
+                        try {
+                            answer = game.getSuggestion();
+                            System.out.println(answer);
+                        } catch (NoHintException e) {
+                            System.out.println(e.getMessage());
+                            Logger.log("Сообщение помощника: " + e.getMessage());
+                            continue;
+                        }
                     }
 
                     game.validateWord(answer);
@@ -51,10 +58,13 @@ public class Wordle {
                 }
 
                 if (!game.canMakeStep()) {
-                    System.out.println("Завершение игры");
+                    System.out.println("Завершение игры. Загаданное слово: " + game.getAnswer());
                     Logger.log("Завершение игры");
                 }
             }
+        } catch (IOException e) {
+            System.out.println("Ошибка загрузки словаря: " + e.getMessage());
+            Logger.log("Ошибка загрузки словаря: " + e.getMessage());
         } catch (GameException e) {
             System.out.println("Ошибка: " + e.getMessage());
             Logger.log("Ошибка: " + e.getMessage());
